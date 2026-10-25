@@ -45,14 +45,14 @@
         <ul>
           <li>Correct Answer: <strong>+2.50 marks</strong></li>
           <li>Negative Marking: <strong>−0.83 marks</strong> (⅓ penalty)</li>
-          <li>Full 80-question paper: <strong>120 minutes</strong> (90 seconds per question for shorter tests)</li>
+          <li>Full 80-question paper: <strong>120 minutes</strong> (90 seconds per question for custom tests)</li>
         </ul>
       </div>
 
       <button id="start-btn" class="btn primary-btn">Start Test</button>
     </section>
 
-    <!-- Step 2: Live Test Screen -->
+    <!-- Step 2: Live Test Screen with Right-Side Palette -->
     <section id="test-screen" class="card hidden">
       <div class="test-topbar">
         <div class="test-meta">
@@ -63,26 +63,35 @@
         </div>
       </div>
 
-      <div class="question-body">
-        <div class="question-meta" id="q-year-tag">UPSC CSAT PYQ</div>
-        <pre class="question-text" id="q-text"></pre>
-        <div class="options-container" id="options-list"></div>
-      </div>
+      <!-- Two-Column Layout -->
+      <div class="exam-layout">
+        <!-- Left: Question & Navigation -->
+        <div class="exam-main">
+          <div class="question-body">
+            <div class="question-meta" id="q-year-tag">UPSC CSAT PYQ</div>
+            <pre class="question-text" id="q-text"></pre>
+            <div class="options-container" id="options-list"></div>
+          </div>
 
-      <div class="test-nav">
-        <button id="prev-btn" class="btn secondary-btn">Previous</button>
-        <button id="clear-btn" class="btn link-btn">Clear Choice</button>
-        <button id="next-btn" class="btn secondary-btn">Next</button>
-        <button id="submit-btn" class="btn danger-btn">Submit Test</button>
-      </div>
+          <div class="test-nav">
+            <button id="prev-btn" class="btn secondary-btn">Previous</button>
+            <button id="clear-btn" class="btn link-btn">Clear Choice</button>
+            <button id="next-btn" class="btn secondary-btn">Next</button>
+            <button id="submit-btn" class="btn danger-btn">Submit Test</button>
+          </div>
+        </div>
 
-      <div class="palette-container">
-        <h4>Question Palette</h4>
-        <div class="palette-grid" id="palette-grid"></div>
+        <!-- Right: Question Palette -->
+        <aside class="exam-sidebar">
+          <div class="palette-container">
+            <h4>Question Palette</h4>
+            <div class="palette-grid" id="palette-grid"></div>
+          </div>
+        </aside>
       </div>
     </section>
 
-    <!-- Step 3: Result & Analysis Screen -->
+    <!-- Step 3: Result & Interactive Single-Explanation Screen -->
     <section id="result-screen" class="card hidden">
       <h2>Test Performance Summary</h2>
       
@@ -110,23 +119,26 @@
         </div>
       </div>
 
-      <div class="solutions-header">
-        <h3>Detailed Solutions</h3>
-        <div class="pagination-controls">
-          <label for="batch-size">Per Page:</label>
-          <select id="batch-size">
-            <option value="5">5 Questions</option>
-            <option value="10" selected>10 Questions</option>
-          </select>
+      <!-- Two-Column Review Layout: Left Solution, Right Review Palette -->
+      <div class="exam-layout review-layout">
+        <div class="exam-main">
+          <div class="explanation-viewer-section">
+            <h3>Question Solution & Explanation</h3>
+            <div id="single-explanation-viewer"></div>
+          </div>
         </div>
-      </div>
 
-      <div id="solutions-container"></div>
-
-      <div class="pagination-nav">
-        <button id="sol-prev-btn" class="btn secondary-btn">Previous Page</button>
-        <span id="sol-page-info">Page 1 of 1</span>
-        <button id="sol-next-btn" class="btn secondary-btn">Next Page</button>
+        <aside class="exam-sidebar">
+          <div class="review-palette-section">
+            <h4>Review Palette</h4>
+            <div class="palette-legend">
+              <span><span class="legend-box rev-correct"></span> Correct</span>
+              <span><span class="legend-box rev-wrong"></span> Incorrect</span>
+              <span><span class="legend-box rev-unattempted"></span> Left</span>
+            </div>
+            <div class="palette-grid review-grid" id="review-palette-grid"></div>
+          </div>
+        </aside>
       </div>
 
       <div style="margin-top: 2rem; text-align: center;">
