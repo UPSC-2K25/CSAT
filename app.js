@@ -47,7 +47,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     allQuestions = await res.json();
     populateYears();
   } catch (err) {
-    alert('Failed to load data.json. Ensure data.json exists in the same directory.');
+    alert('Failed to load data.json. Ensure data.json exists in the same folder.');
   }
 });
 
@@ -73,10 +73,10 @@ startBtn.addEventListener('click', () => {
   currentIdx = 0;
 
   if (testMode.value === 'year') {
-    const selectedYear = parseInt(yearSelect.value);
+    const selectedYear = parseInt(yearSelect.value, 10);
     activeQuestions = allQuestions.filter(q => q.year === selectedYear);
   } else {
-    const count = Math.min(parseInt(questionCountInput.value) || 20, allQuestions.length);
+    const count = Math.min(parseInt(questionCountInput.value, 10) || 20, allQuestions.length);
     const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
     activeQuestions = shuffled.slice(0, count);
   }
@@ -86,8 +86,8 @@ startBtn.addEventListener('click', () => {
     return;
   }
 
-  // UPSC CSAT standard: 80 questions = 120 mins (7200 sec), which is 90s per question
-  secondsRemaining = activeQuestions.length === 80 ? 120 * 60 : Math.round(activeQuestions.length * 90);
+  // UPSC CSAT standard: 80 questions = 120 mins (7200 sec), proportional 90s per question
+  secondsRemaining = (activeQuestions.length === 80) ? (120 * 60) : Math.round(activeQuestions.length * 90);
 
   configScreen.classList.add('hidden');
   resultScreen.classList.add('hidden');
@@ -103,15 +103,94 @@ function loadQuestion(idx) {
   currentIdx = idx;
   const q = activeQuestions[idx];
 
-  qCounter.textContent = `Question ${idx + 1} of${activeQuestions.length}`;
-  qYearTag.textContent = `UPSC CSAT ${q.year} — Question ${q.qno}`; qText.textContent = q.question;  optionsList.innerHTML = ''; const currentAnswer = userAnswers[idx];  const optKeys = ['a', 'b', 'c', 'd']; optKeys.forEach(key => { if (q.options && q.options[key]) { const optDiv = document.createElement('div'); optDiv.className = `option-item ${currentAnswer === key.toUpperCase() ? 'selected' : ''}`;
-      optDiv.innerHTML = `<span class="option-label">(${key})</span> <span>${q.options[key]}</span>`; optDiv.addEventListener('click', () => { userAnswers[idx] = key.toUpperCase(); loadQuestion(idx); renderPalette(); }); optionsList.appendChild(optDiv); } });  prevBtn.disabled = idx === 0; nextBtn.disabled = idx === activeQuestions.length - 1; renderPalette(); }  function renderPalette() { paletteGrid.innerHTML = ''; activeQuestions.forEach((_, idx) => { const btn = document.createElement('button'); btn.className = 'palette-btn'; btn.textContent = idx + 1; if (userAnswers[idx]) btn.classList.add('answered'); if (idx === currentIdx) btn.classList.add('current');  btn.addEventListener('click', () => loadQuestion(idx)); paletteGrid.appendChild(btn); }); }  // Navigation Listeners prevBtn.addEventListener('click', () => { if (currentIdx > 0) loadQuestion(currentIdx - 1); }); nextBtn.addEventListener('click', () => { if (currentIdx < activeQuestions.length - 1) loadQuestion(currentIdx + 1); }); clearBtn.addEventListener('click', () => { delete userAnswers[currentIdx]; loadQuestion(currentIdx); renderPalette(); });  // 4. Timer Logic function startTimer() { clearInterval(timerInterval); updateTimerDisplay();  timerInterval = setInterval(() => { secondsRemaining--; updateTimerDisplay();  if (secondsRemaining <= 0) { clearInterval(timerInterval); alert('Time is up! Submitting test automatically.'); evaluateTest(); } }, 1000); }  function updateTimerDisplay() { const hrs = String(Math.floor(secondsRemaining / 3600)).padStart(2, '0'); const mins = String(Math.floor((secondsRemaining \% 3600) / 60)).padStart(2, '0'); const secs = String(secondsRemaining \% 60).padStart(2, '0'); timerDisplay.textContent = `${hrs}:${mins}:${secs}`;
+  qCounter.textContent = `Question ${idx + 1} of ${activeQuestions.length}`;
+  qYearTag.textContent = `UPSC CSAT ${q.year} — Question ${q.qno}`;
+  qText.textContent = q.question;
+
+  optionsList.innerHTML = '';
+  const currentAnswer = userAnswers[idx];
+  const optKeys = ['a', 'b', 'c', 'd'];
+
+  optKeys.forEach(key => {
+    if (q.options && q.options[key]) {
+      const optDiv = document.createElement('div');
+      optDiv.className = `option-item ${currentAnswer === key.toUpperCase() ? 'selected' : ''}`;
+      optDiv.innerHTML = `<span class="option-label">(${key})</span> <span>${q.options[key]}</span>`;
+      optDiv.addEventListener('click', () => {
+        userAnswers[idx] = key.toUpperCase();
+        loadQuestion(idx);
+        renderPalette();
+      });
+      optionsList.appendChild(optDiv);
+    }
+  });
+
+  prevBtn.disabled = (idx === 0);
+  nextBtn.disabled = (idx === activeQuestions.length - 1);
+  renderPalette();
+}
+
+function renderPalette() {
+  paletteGrid.innerHTML = '';
+  activeQuestions.forEach((_, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'palette-btn';
+    btn.textContent = idx + 1;
+    if (userAnswers[idx]) btn.classList.add('answered');
+    if (idx === currentIdx) btn.classList.add('current');
+
+    btn.addEventListener('click', () => loadQuestion(idx));
+    paletteGrid.appendChild(btn);
+  });
+}
+
+// Navigation Listeners
+prevBtn.addEventListener('click', () => {
+  if (currentIdx > 0) {
+    loadQuestion(currentIdx - 1);
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  if (currentIdx < activeQuestions.length - 1) {
+    loadQuestion(currentIdx + 1);
+  }
+});
+
+clearBtn.addEventListener('click', () => {
+  delete userAnswers[currentIdx];
+  loadQuestion(currentIdx);
+  renderPalette();
+});
+
+// 4. Timer Logic
+function startTimer() {
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+
+  timerInterval = setInterval(() => {
+    secondsRemaining--;
+    updateTimerDisplay();
+
+    if (secondsRemaining <= 0) {
+      clearInterval(timerInterval);
+      alert('Time is up! Submitting test automatically.');
+      evaluateTest();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const hrs = String(Math.floor(secondsRemaining / 3600)).padStart(2, '0');
+  const mins = String(Math.floor((secondsRemaining % 3600) / 60)).padStart(2, '0');
+  const secs = String(secondsRemaining % 60).padStart(2, '0');
+  timerDisplay.textContent = `${hrs}:${mins}:${secs}`;
 }
 
 // 5. Evaluation & Scoring
 submitBtn.addEventListener('click', () => {
   const answeredCount = Object.keys(userAnswers).length;
-  const confirmMsg = `You have answered ${answeredCount} of${activeQuestions.length} questions. Do you want to submit?`;
+  const confirmMsg = `You have answered ${answeredCount} of ${activeQuestions.length} questions. Do you want to submit?`;
   if (confirm(confirmMsg)) {
     clearInterval(timerInterval);
     evaluateTest();
@@ -134,7 +213,6 @@ function evaluateTest() {
     }
   });
 
-  // CSAT Marks Formula
   const netMarks = (correct * 2.50) - (wrong * 0.8333);
   const accuracy = attempted > 0 ? ((correct / attempted) * 100).toFixed(1) : 0;
 
@@ -156,15 +234,14 @@ function evaluateTest() {
   testScreen.classList.add('hidden');
   resultScreen.classList.remove('hidden');
 
-  // Initialize explanation pagination
   solCurrentPage = 1;
-  solBatchSize = parseInt(solBatchSelect.value);
+  solBatchSize = parseInt(solBatchSelect.value, 10);
   renderBatchSolutions();
 }
 
 // 6. Paginated Batch Loading for Solutions
 solBatchSelect.addEventListener('change', (e) => {
-  solBatchSize = parseInt(e.target.value);
+  solBatchSize = parseInt(e.target.value, 10);
   solCurrentPage = 1;
   renderBatchSolutions();
 });
@@ -186,10 +263,10 @@ solNextBtn.addEventListener('click', () => {
 
 function renderBatchSolutions() {
   const totalPages = Math.ceil(activeQuestions.length / solBatchSize) || 1;
-  solPageInfo.textContent = `Page ${solCurrentPage} of${totalPages}`;
+  solPageInfo.textContent = `Page ${solCurrentPage} of ${totalPages}`;
 
-  solPrevBtn.disabled = solCurrentPage === 1;
-  solNextBtn.disabled = solCurrentPage === totalPages;
+  solPrevBtn.disabled = (solCurrentPage === 1);
+  solNextBtn.disabled = (solCurrentPage === totalPages);
 
   const startIdx = (solCurrentPage - 1) * solBatchSize;
   const batch = activeQuestions.slice(startIdx, startIdx + solBatchSize);
@@ -199,8 +276,8 @@ function renderBatchSolutions() {
   batch.forEach((q, offset) => {
     const globalIdx = startIdx + offset;
     const chosen = userAnswers[globalIdx];
-    const isCorrect = chosen && chosen === q.answer.trim().toUpperCase();
-    
+    const isCorrect = chosen && (chosen === q.answer.trim().toUpperCase());
+
     let statusClass = 'sol-status-unattempted';
     let statusBadge = '<span style="color:#64748b">Not Attempted</span>';
 
@@ -210,7 +287,12 @@ function renderBatchSolutions() {
         statusBadge = '<span style="color:#15803d">✓ Correct (+2.50)</span>';
       } else {
         statusClass = 'sol-status-wrong';
-        statusBadge = `<span style="color:#b91c1c">✗ Incorrect (−0.83) — Marked (${chosen})</span>`; } }  const card = document.createElement('div'); card.className = `sol-card ${statusClass}`;
+        statusBadge = `<span style="color:#b91c1c">✗ Incorrect (−0.83) — Marked (${chosen})</span>`;
+      }
+    }
+
+    const card = document.createElement('div');
+    card.className = `sol-card ${statusClass}`;
     card.innerHTML = `
       <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
         <strong>Q${globalIdx + 1} (${q.year} Q${q.qno})</strong>
@@ -228,7 +310,10 @@ function renderBatchSolutions() {
     solutionsContainer.appendChild(card);
   });
 
-  window.scrollTo({ top: document.querySelector('.solutions-header').offsetTop - 20, behavior: 'smooth' });
+  const headerEl = document.querySelector('.solutions-header');
+  if (headerEl) {
+    window.scrollTo({ top: headerEl.offsetTop - 20, behavior: 'smooth' });
+  }
 }
 
 restartBtn.addEventListener('click', () => {
