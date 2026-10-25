@@ -24,14 +24,15 @@ body {
   padding: 1.5rem;
 }
 
+/* Widened container to accommodate two-column side-by-side view */
 .container {
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .app-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .app-header h1 {
@@ -48,7 +49,7 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 2rem;
+  padding: 1.75rem;
   box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
 }
 
@@ -128,6 +129,31 @@ select, input[type="number"] {
   text-decoration: underline;
 }
 
+/* Two-Column Side-by-Side Exam Layout */
+.exam-layout {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.exam-main {
+  flex: 1;
+  min-width: 0; /* Prevents overflow */
+}
+
+.exam-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.25rem;
+  position: sticky;
+  top: 1.5rem;
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
+}
+
 /* Test Area */
 .test-topbar {
   display: flex;
@@ -157,7 +183,7 @@ select, input[type="number"] {
 .question-text {
   white-space: pre-wrap;
   font-family: inherit;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   margin: 1rem 0 1.5rem 0;
   line-height: 1.7;
 }
@@ -193,31 +219,31 @@ select, input[type="number"] {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 2rem 0;
+  margin-top: 2rem;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
-/* Palette */
-.palette-container {
-  border-top: 1px solid var(--border);
-  padding-top: 1.5rem;
+/* Palette Styling on Right Sidebar */
+.palette-container h4, .review-palette-section h4 {
+  margin-bottom: 0.75rem;
+  color: var(--primary);
 }
 
 .palette-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 0.5rem;
-  margin-top: 0.75rem;
 }
 
 .palette-btn {
-  height: 40px;
+  height: 38px;
   border-radius: 4px;
   border: 1px solid var(--border);
-  background: #f8fafc;
+  background: #ffffff;
   cursor: pointer;
   font-weight: 600;
+  font-size: 0.9rem;
 }
 
 .palette-btn.current {
@@ -233,7 +259,7 @@ select, input[type="number"] {
 /* Scorecard */
 .scorecard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
   gap: 1rem;
   margin: 1.5rem 0 2rem 0;
 }
@@ -272,62 +298,147 @@ select, input[type="number"] {
   margin-top: 0.25rem;
 }
 
-/* Solutions Pagination */
-.solutions-header {
+/* Review Palette & Legend */
+.palette-legend {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-top: 2px solid var(--border);
-  padding-top: 1.5rem;
-  margin-top: 2rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
 }
 
+.palette-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.legend-box {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.rev-btn {
+  height: 38px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #ffffff;
+  transition: transform 0.1s ease;
+}
+
+.rev-btn:hover {
+  transform: translateY(-2px);
+}
+
+.rev-btn.rev-correct {
+  background-color: var(--success);
+}
+
+.rev-btn.rev-wrong {
+  background-color: var(--danger);
+}
+
+.rev-btn.rev-unattempted {
+  background-color: #94a3b8;
+}
+
+.rev-btn.active {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 2px #38bdf8;
+  transform: scale(1.05);
+}
+
+/* Single Explanation Viewer */
 .sol-card {
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 1.25rem;
-  margin: 1rem 0;
+  padding: 1.5rem;
+  margin-top: 0.5rem;
   background: #fafafa;
 }
 
 .sol-card-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
-.sol-status-correct { border-left: 5px solid var(--success); }
-.sol-status-wrong { border-left: 5px solid var(--danger); }
-.sol-status-unattempted { border-left: 5px solid var(--secondary); }
+.sol-status-correct { border-left: 6px solid var(--success); }
+.sol-status-wrong { border-left: 6px solid var(--danger); }
+.sol-status-unattempted { border-left: 6px solid var(--secondary); }
 
-.text-success { color: var(--success); font-weight: 600; }
-.text-danger { color: var(--danger); font-weight: 600; }
-.text-muted { color: var(--secondary); font-weight: 600; }
+.text-success { color: var(--success); font-weight: 700; }
+.text-danger { color: var(--danger); font-weight: 700; }
+.text-muted { color: var(--secondary); font-weight: 700; }
 
 .sol-qtext {
   white-space: pre-wrap;
   font-family: inherit;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
   line-height: 1.6;
 }
 
+.sol-options-recap {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.sol-opt-row {
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  margin-bottom: 0.25rem;
+}
+
+.opt-correct-target {
+  background: #dcfce7;
+  color: #14532d;
+  font-weight: 600;
+}
+
+.opt-wrong-target {
+  background: #fee2e2;
+  color: #7f1d1d;
+  text-decoration: line-through;
+}
+
 .sol-ans {
-  font-size: 0.95rem;
-  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .sol-explanation {
   background: #f1f5f9;
-  padding: 0.85rem;
-  border-radius: 4px;
+  padding: 1rem;
+  border-radius: 6px;
   margin-top: 0.75rem;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
-.pagination-nav {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
+/* Mobile & Tablet Responsive Layout */
+@media (max-width: 860px) {
+  .exam-layout {
+    flex-direction: column-reverse; /* Places palette accessible below on small screens */
+  }
+
+  .exam-sidebar {
+    width: 100%;
+    position: static;
+    max-height: none;
+    margin-top: 1.5rem;
+  }
+
+  .palette-grid {
+    grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+  }
 }
