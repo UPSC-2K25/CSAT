@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UPSC CSE CSAT Mock Test</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <h1>UPSC CSE CSAT Mock Test</h1>
+      <p class="subtitle">Official Scheme: +2.50 Correct, −0.83 Negative</p>
+    </header>
+
+    <!-- Status & Fallback Screen -->
+    <div id="status-screen" class="card status-box">
+      <h3 id="status-message">Loading data...</h3>
+    </div>
+
+    <!-- Step 1: Configuration Screen -->
+    <section id="config-screen" class="card hidden">
+      <h2>Configure Your Test</h2>
+      
+      <div class="form-group">
+        <label for="test-mode">Attempt Mode:</label>
+        <select id="test-mode">
+          <option value="year">Full Paper by Year</option>
+          <option value="random">Random Practice from All Years</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="year-group">
+        <label for="year-select">Select Year:</label>
+        <select id="year-select"></select>
+      </div>
+
+      <div class="form-group hidden" id="count-group">
+        <label for="question-count">Number of Questions:</label>
+        <input type="number" id="question-count" min="5" max="80" value="20">
+      </div>
+
+      <div class="exam-rules">
+        <h3>Exam Timing & Marking Standards:</h3>
+        <ul>
+          <li>Correct Answer: <strong>+2.50 marks</strong></li>
+          <li>Negative Marking: <strong>−0.83 marks</strong> (⅓ penalty)</li>
+          <li>Full 80-question paper: <strong>120 minutes</strong> (90 seconds per question for shorter tests)</li>
+        </ul>
+      </div>
+
+      <button id="start-btn" class="btn primary-btn">Start Test</button>
+    </section>
+
+    <!-- Step 2: Live Test Screen -->
+    <section id="test-screen" class="card hidden">
+      <div class="test-topbar">
+        <div class="test-meta">
+          <span id="q-counter">Question 1 of 80</span>
+        </div>
+        <div class="timer-box">
+          Time Remaining: <span id="timer-display">02:00:00</span>
+        </div>
+      </div>
+
+      <div class="question-body">
+        <div class="question-meta" id="q-year-tag">UPSC CSAT PYQ</div>
+        <pre class="question-text" id="q-text"></pre>
+        <div class="options-container" id="options-list"></div>
+      </div>
+
+      <div class="test-nav">
+        <button id="prev-btn" class="btn secondary-btn">Previous</button>
+        <button id="clear-btn" class="btn link-btn">Clear Choice</button>
+        <button id="next-btn" class="btn secondary-btn">Next</button>
+        <button id="submit-btn" class="btn danger-btn">Submit Test</button>
+      </div>
+
+      <div class="palette-container">
+        <h4>Question Palette</h4>
+        <div class="palette-grid" id="palette-grid"></div>
+      </div>
+    </section>
+
+    <!-- Step 3: Result & Analysis Screen -->
+    <section id="result-screen" class="card hidden">
+      <h2>Test Performance Summary</h2>
+      
+      <div class="scorecard-grid">
+        <div class="score-card net">
+          <span class="label">Net Marks</span>
+          <span class="value" id="net-score">0.00</span>
+          <span class="qualify" id="qualify-status">Qualifying (≥ 66.67)</span>
+        </div>
+        <div class="score-card">
+          <span class="label">Attempted</span>
+          <span class="value" id="attempted-count">0</span>
+        </div>
+        <div class="score-card correct">
+          <span class="label">Correct (+2.50)</span>
+          <span class="value" id="correct-count">0</span>
+        </div>
+        <div class="score-card wrong">
+          <span class="label">Incorrect (−0.83)</span>
+          <span class="value" id="wrong-count">0</span>
+        </div>
+        <div class="score-card">
+          <span class="label">Accuracy</span>
+          <span class="value" id="accuracy-rate">0%</span>
+        </div>
+      </div>
+
+      <div class="solutions-header">
+        <h3>Detailed Solutions</h3>
+        <div class="pagination-controls">
+          <label for="batch-size">Per Page:</label>
+          <select id="batch-size">
+            <option value="5">5 Questions</option>
+            <option value="10" selected>10 Questions</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="solutions-container"></div>
+
+      <div class="pagination-nav">
+        <button id="sol-prev-btn" class="btn secondary-btn">Previous Page</button>
+        <span id="sol-page-info">Page 1 of 1</span>
+        <button id="sol-next-btn" class="btn secondary-btn">Next Page</button>
+      </div>
+
+      <div style="margin-top: 2rem; text-align: center;">
+        <button id="restart-btn" class="btn primary-btn">Attempt Another Test</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
