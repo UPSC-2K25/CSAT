@@ -5,9 +5,7 @@ let userAnswers = {};
 let currentIdx = 0;
 let timerInterval = null;
 let secondsRemaining = 0;
-
-let solCurrentPage = 1;
-let solBatchSize = 10;
+let reviewIdx = null;
 
 // UI Elements
 const statusScreen = document.getElementById('status-screen');
@@ -36,11 +34,9 @@ const submitBtn = document.getElementById('submit-btn');
 const startBtn = document.getElementById('start-btn');
 const restartBtn = document.getElementById('restart-btn');
 
-const solBatchSelect = document.getElementById('batch-size');
-const solPrevBtn = document.getElementById('sol-prev-btn');
-const solNextBtn = document.getElementById('sol-next-btn');
-const solPageInfo = document.getElementById('sol-page-info');
-const solutionsContainer = document.getElementById('solutions-container');
+// Review Elements
+const reviewPaletteGrid = document.getElementById('review-palette-grid');
+const singleExplanationViewer = document.getElementById('single-explanation-viewer');
 
 // 1. Fetch data.json on startup
 async function loadData() {
@@ -77,7 +73,7 @@ function initYearDropdown() {
     }
   }
   const years = Array.from(yearsSet).sort((a, b) => b - a);
-  
+
   if (years.length === 0) {
     showError('Data not found');
     return;
@@ -110,6 +106,7 @@ testMode.addEventListener('change', () => {
 startBtn.addEventListener('click', () => {
   userAnswers = {};
   currentIdx = 0;
+  reviewIdx = null;
 
   if (testMode.value === 'year') {
     const chosenYear = parseInt(yearSelect.value, 10);
@@ -126,7 +123,6 @@ startBtn.addEventListener('click', () => {
     return;
   }
 
-  // UPSC CSAT standard: 80 questions = 120 mins (7200s), otherwise 90s per question
   secondsRemaining = (activeQuestions.length === 80) ? 7200 : Math.round(activeQuestions.length * 90);
 
   configScreen.classList.add('hidden');
@@ -138,7 +134,7 @@ startBtn.addEventListener('click', () => {
   startTimer();
 });
 
-// 4. Question Display & Palette
+// 4. Live Question Display & Live Palette
 function loadQuestion(idx) {
   currentIdx = idx;
   const q = activeQuestions[idx];
@@ -287,112 +283,136 @@ function evaluateTest() {
   testScreen.classList.add('hidden');
   resultScreen.classList.remove('hidden');
 
-  solCurrentPage = 1;
-  solBatchSize = parseInt(solBatchSelect.value, 10);
-  renderBatchSolutions();
+  renderReviewPalette();
+  // Automatically open the first question's explanation initially
+  showSingleExplanation(0);
 }
 
-// 7. Paginated Batch Loading for Explanations
-solBatchSelect.addEventListener('change', (e) => {
-  solBatchSize = parseInt(e.target.value, 10);
-  solCurrentPage = 1;
-  renderBatchSolutions();
-});
+// 7. Interactive Review Palette & Explanation Display
+function renderReviewPalette() {
+  reviewPaletteGrid.innerHTML = '';
+  activeQuestions.forEach((q, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'rev-btn';
+    btn.textContent = idx + 1;
 
-solPrevBtn.addEventListener('click', () => {
-  if (solCurrentPage > 1) {
-    solCurrentPage--;
-    renderBatchSolutions();
-  }
-});
-
-solNextBtn.addEventListener('click', () => {
-  const totalPages = Math.ceil(activeQuestions.length / solBatchSize);
-  if (solCurrentPage < totalPages) {
-    solCurrentPage++;
-    renderBatchSolutions();
-  }
-});
-
-function renderBatchSolutions() {
-  const totalPages = Math.ceil(activeQuestions.length / solBatchSize) || 1;
-  solPageInfo.textContent = 'Page ' + solCurrentPage + ' of ' + totalPages;
-
-  solPrevBtn.disabled = (solCurrentPage === 1);
-  solNextBtn.disabled = (solCurrentPage === totalPages);
-
-  const startIdx = (solCurrentPage - 1) * solBatchSize;
-  const batch = activeQuestions.slice(startIdx, startIdx + solBatchSize);
-
-  solutionsContainer.innerHTML = '';
-
-  batch.forEach((q, offset) => {
-    const globalIdx = startIdx + offset;
-    const chosen = userAnswers[globalIdx];
-    const isCorrect = chosen && (chosen === q.answer.trim().toUpperCase());
-
-    const card = document.createElement('div');
-    card.className = 'sol-card';
-
-    let badgeClass = 'text-muted';
-    let badgeText = 'Not Attempted';
-
+    const chosen = userAnswers[idx];
     if (chosen) {
-      if (isCorrect) {
-        card.classList.add('sol-status-correct');
-        badgeClass = 'text-success';
-        badgeText = 'Correct (+2.50)';
+      if (chosen === q.answer.trim().toUpperCase()) {
+        btn.classList.add('rev-correct');
       } else {
-        card.classList.add('sol-status-wrong');
-        badgeClass = 'text-danger';
-        badgeText = 'Incorrect (−0.83) — Marked (' + chosen + ')';
+        btn.classList.add('rev-wrong');
       }
     } else {
-      card.classList.add('sol-status-unattempted');
+      btn.classList.add('rev-unattempted');
     }
 
-    const headDiv = document.createElement('div');
-    headDiv.className = 'sol-card-header';
+    if (idx === reviewIdx) {
+      btn.classList.add('active');
+    }
 
-    const titleSpan = document.createElement('strong');
-    titleSpan.textContent = 'Q.' + (globalIdx + 1) + ' (' + q.year + ' CSAT Q.' + q.qno + ')';
+    btn.addEventListener('click', () => {
+      showSingleExplanation(idx);
+    });
 
-    const statusSpan = document.createElement('span');
-    statusSpan.className = badgeClass;
-    statusSpan.textContent = badgeText;
+    reviewPaletteGrid.appendChild(btn);
+  });
+}
 
-    headDiv.appendChild(titleSpan);
-    headDiv.appendChild(statusSpan);
+function showSingleExplanation(idx) {
+  reviewIdx = idx;
+  const q = activeQuestions[idx];
+  const chosen = userAnswers[idx];
+  const isCorrect = chosen && (chosen === q.answer.trim().toUpperCase());
 
-    const qBody = document.createElement('pre');
-    qBody.className = 'sol-qtext';
-    qBody.textContent = q.question;
-
-    const ansDiv = document.createElement('div');
-    ansDiv.className = 'sol-ans';
-    ansDiv.innerHTML = '<strong>Official Answer:</strong> (' + q.answer + ')';
-
-    const expDiv = document.createElement('div');
-    expDiv.className = 'sol-explanation';
-    const expTitle = document.createElement('strong');
-    expTitle.textContent = 'Explanation:';
-    const expText = document.createElement('div');
-    expText.textContent = q.explanation || 'No detailed explanation provided.';
-    expDiv.appendChild(expTitle);
-    expDiv.appendChild(expText);
-
-    card.appendChild(headDiv);
-    card.appendChild(qBody);
-    card.appendChild(ansDiv);
-    card.appendChild(expDiv);
-
-    solutionsContainer.appendChild(card);
+  // Highlight the currently selected review question button
+  const allRevBtns = reviewPaletteGrid.querySelectorAll('.rev-btn');
+  allRevBtns.forEach((b, bIdx) => {
+    if (bIdx === idx) {
+      b.classList.add('active');
+    } else {
+      b.classList.remove('active');
+    }
   });
 
-  const headerEl = document.querySelector('.solutions-header');
-  if (headerEl) {
-    headerEl.scrollIntoView({ behavior: 'smooth' });
+  singleExplanationViewer.innerHTML = '';
+
+  const card = document.createElement('div');
+  card.className = 'sol-card';
+
+  let badgeClass = 'text-muted';
+  let badgeText = 'Not Attempted';
+
+  if (chosen) {
+    if (isCorrect) {
+      card.classList.add('sol-status-correct');
+      badgeClass = 'text-success';
+      badgeText = 'Correct (+2.50)';
+    } else {
+      card.classList.add('sol-status-wrong');
+      badgeClass = 'text-danger';
+      badgeText = 'Incorrect (−0.83) — Marked (' + chosen + ')';
+    }
+  } else {
+    card.classList.add('sol-status-unattempted');
   }
+
+  const headDiv = document.createElement('div');
+  headDiv.className = 'sol-card-header';
+
+  const titleSpan = document.createElement('strong');
+  titleSpan.textContent = 'Question ' + (idx + 1) + ' of ' + activeQuestions.length + ' (' + q.year + ' CSAT Q.' + q.qno + ')';
+
+  const statusSpan = document.createElement('span');
+  statusSpan.className = badgeClass;
+  statusSpan.textContent = badgeText;
+
+  headDiv.appendChild(titleSpan);
+  headDiv.appendChild(statusSpan);
+
+  const qBody = document.createElement('pre');
+  qBody.className = 'sol-qtext';
+  qBody.textContent = q.question;
+
+  // Options recap
+  const optList = document.createElement('div');
+  optList.className = 'sol-options-recap';
+  const optKeys = ['a', 'b', 'c', 'd'];
+  optKeys.forEach(k => {
+    if (q.options && q.options[k]) {
+      const optRow = document.createElement('div');
+      optRow.className = 'sol-opt-row';
+      if (k.toUpperCase() === q.answer.trim().toUpperCase()) {
+        optRow.classList.add('opt-correct-target');
+      }
+      if (chosen === k.toUpperCase() && !isCorrect) {
+        optRow.classList.add('opt-wrong-target');
+      }
+      optRow.innerHTML = '<strong>(' + k + ')</strong> ' + q.options[k];
+      optList.appendChild(optRow);
+    }
+  });
+
+  const ansDiv = document.createElement('div');
+  ansDiv.className = 'sol-ans';
+  ansDiv.innerHTML = '<strong>Official Answer:</strong> (' + q.answer + ')';
+
+  const expDiv = document.createElement('div');
+  expDiv.className = 'sol-explanation';
+  const expTitle = document.createElement('strong');
+  expTitle.textContent = 'Explanation:';
+  const expText = document.createElement('div');
+  expText.textContent = q.explanation || 'No detailed explanation provided.';
+  expDiv.appendChild(expTitle);
+  expDiv.appendChild(expText);
+
+  card.appendChild(headDiv);
+  card.appendChild(qBody);
+  card.appendChild(optList);
+  card.appendChild(ansDiv);
+  card.appendChild(expDiv);
+
+  singleExplanationViewer.appendChild(card);
 }
 
 restartBtn.addEventListener('click', () => {
